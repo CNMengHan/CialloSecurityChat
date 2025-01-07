@@ -14,25 +14,19 @@ import sys
 from io import StringIO
 
 app = Flask(__name__)
-# 添加 URL 前缀
 app.wsgi_app = ProxyFix(app.wsgi_app)
 app.config['APPLICATION_ROOT'] = '/ciallosecurity'
-# 使用固定的密钥，避免每次重启服务都重置会话
 app.config['SECRET_KEY'] = 'your-secret-key'  
-# 移除一些过于严格的安全配置
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     PERMANENT_SESSION_LIFETIME=datetime.timedelta(hours=24)
 )
 
-# 允许所有源的WebSocket连接
 socketio = SocketIO(app, 
                    cors_allowed_origins="*",
                    path='/ciallosecurity/socket.io')
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 创建一个字符串流来捕获日志
 log_stream = StringIO()
 logging.basicConfig(
     level=logging.INFO,
@@ -110,7 +104,7 @@ def handle_message(data):
         return
     
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    logger.info(f"用户 {username} 发送消息: {message}")  # 添加日志记录
+    logger.info(f"用户 {username} 发送消息: {message}")  
     
     db_path = os.path.join(BASE_DIR, 'chat.db')
     try:
@@ -134,7 +128,6 @@ def favicon():
     return send_from_directory(BASE_DIR,
                              'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# 添加获取日志的路由
 @app.route('/ciallosecurity/logs')
 def get_logs():
     return jsonify({'logs': log_stream.getvalue()})
