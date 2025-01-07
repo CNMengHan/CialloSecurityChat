@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ciallo~(∠・ω< )⌒★</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin">
+    <!-- 你在偷看什么！！ -->
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        #chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2d2d2d;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #messages::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        #messages::-webkit-scrollbar-track {
+            background: #2d2d2d;
+            border-radius: 5px;
+        }
+        
+        #messages::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: #45a049;
+        }
+        #messages {
+            height: 70vh;
+            min-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #363636;
+            border-radius: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #4CAF50 #2d2d2d;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #424242;
+            border-radius: 4px;
+        }
+        .timestamp {
+            color: #888;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        #input-container {
+            display: flex;
+            gap: 10px;
+        }
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #363636;
+            color: #ffffff;
+        }
+        #send-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: filter 0.3s;
+        }
+        #send-button:hover {
+            filter: brightness(85%);
+        }
+        .menu-bar {
+            display: flex;
+            background-color: #333;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+
+        .menu-item:hover {
+            background-color: #444;
+        }
+
+        .menu-item.active {
+            background-color: #2d2d2d;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        #chat-container, #settings-container, #about-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2d2d2d;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .loading-text {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            animation: dot-bounce 0.8s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dot-bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+        }
+
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .settings-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .settings-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .settings-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent);
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
+        }
+
+        .settings-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        #logs-content {
+            background-color: #363636;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            white-space: pre-wrap;
+            height: 70vh;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            color: #b3b3b3;
+            scrollbar-width: thin;
+            scrollbar-color: #4CAF50 #2d2d2d;
+        }
+
+        #logs-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #logs-content::-webkit-scrollbar-track {
+            background: #2d2d2d;
+            border-radius: 5px;
+        }
+
+        #logs-content::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        #logs-content::-webkit-scrollbar-thumb:hover {
+            background: #45a049;
+        }
+
+        .log-info {
+            color: #4CAF50;
+        }
+
+        .log-error {
+            color: #ff5252;
+        }
+
+        .log-timestamp {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-text">Ciallo~(∠・ω< )⌒★</div>
+        <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="menu-bar">
+            <div class="menu-item active" data-page="chat">聊天</div>
+            <div class="menu-item" data-page="settings">设置</div>
+            <div class="menu-item" data-page="about">关于</div>
+            <div class="menu-item" data-page="logs">日志</div>
+        </div>
+
+        <div id="chat-container" class="page active" data-page="chat">
+            <div id="messages">
+                {% for msg in chat_history %}
+                <div class="message">
+                    <span class="username">{{ msg[0] }}</span>
+                    <span class="timestamp">{{ msg[2] }}</span>
+                    <div>{{ msg[1] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div id="input-container">
+                <input type="text" id="message-input" placeholder="输入消息...">
+                <button id="send-button">发送</button>
+            </div>
+        </div>
+
+        <div id="settings-container" class="page" data-page="settings">
+            <h3>设置</h3>
+            <button class="settings-btn" onclick="location.reload()">平平无奇的按钮</button>
+        </div>
+
+        <div id="about-container" class="page" data-page="about">
+            <h3>关于作者</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="https://github.com/CNMengHan" target="_blank" style="display: flex; align-items: center; text-decoration: none; color: #fff;">
+                    <svg height="24" width="24" viewBox="0 0 16 16" style="fill: currentColor;">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    </svg>
+                    <span style="margin-left: 8px;">CNMengHan</span>
+                </a>
+            </div>
+        </div>
+        <div id="logs-container" class="page" data-page="logs">
+            <div id="logs-content"></div>
+            <div style="display: flex; gap: 10px;">
+                <button class="settings-btn" onclick="refreshLogs()">刷新日志</button>
+                <button class="settings-btn" onclick="clearLogs()">清空日志</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io({
+            path: '/ciallosecurity/socket.io'
+        });
+        const username = "{{ username }}";
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                
+                item.classList.add('active');
+                const pageId = item.getAttribute('data-page');
+                document.querySelector(`.page[data-page="${pageId}"]`).classList.add('active');
+                
+                if (item.getAttribute('data-page') === 'logs') {
+                    refreshLogs();
+                    logRefreshInterval = setInterval(refreshLogs, 5000);
+                } else {
+                    clearInterval(logRefreshInterval);
+                }
+            });
+        });
+        function getColorForUsername(username) {
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = hash % 360;
+            return `hsl(${h}, 70%, 70%)`;
+        }
+        function validateMessage(message) {
+            return message && message.trim().length > 0 && message.length <= 500;
+        }
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (validateMessage(message)) {
+                socket.emit('send_message', {
+                    message: message
+                });
+                messageInput.value = '';
+            } else {
+                alert('消息不能为空或超过500字符');
+            }
+        });
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+        socket.on('receive_message', (data) => {
+            addMessage(data);
+        });
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+        socket.on('connect_error', (error) => {
+            console.error('连接错误:', error);
+            alert('连接服务器失败，请刷新页面重试');
+        });
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+
+        socket.on('disconnect', () => {
+            console.log('断开连接，尝试重新连接...');
+            if (reconnectAttempts < maxReconnectAttempts) {
+                setTimeout(() => {
+                    socket.connect();
+                    reconnectAttempts++;
+                }, 1000 * Math.pow(2, reconnectAttempts));
+            } else {
+                alert('连接失败，请刷新页面重试');
+            }
+        });
+
+        socket.on('connect', () => {
+            reconnectAttempts = 0;
+        });
+        const userColor = getColorForUsername(username);
+        sendButton.style.backgroundColor = userColor;
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1500);
+        });
+        window.addEventListener('beforeunload', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.remove('fade-out');
+            loadingScreen.style.display = 'flex';
+        });
+        function addMessage(data) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            const userColor = getColorForUsername(data.username);
+            messageDiv.innerHTML = `
+                <span class="username" style="color: ${userColor}; font-weight: bold;">${data.username}</span>
+                <span class="timestamp">${data.timestamp}</span>
+                <div>${data.message}</div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.username').forEach(usernameElement => {
+                const name = usernameElement.textContent;
+                usernameElement.style.color = getColorForUsername(name);
+                usernameElement.style.fontWeight = 'bold';
+            });
+        });
+        function refreshLogs() {
+            fetch('/ciallosecurity/logs')
+                .then(response => response.json())
+                .then(data => {
+                    const logsContent = document.getElementById('logs-content');
+                    const formattedLogs = data.logs.split('\n').map(line => {
+                        if (line.includes('[INFO]')) {
+                            return line.replace(
+                                /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \[(\w+)\] (.*)/,
+                                '<span class="log-timestamp">$1</span> <span class="log-info">[$2]</span> $3'
+                            );
+                        } else if (line.includes('[ERROR]')) {
+                            return line.replace(
+                                /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \[(\w+)\] (.*)/,
+                                '<span class="log-timestamp">$1</span> <span class="log-error">[$2]</span> $3'
+                            );
+                        }
+                        return line;
+                    }).join('<br>');
+                    logsContent.innerHTML = formattedLogs;
+                    const shouldScroll = logsContent.scrollTop + logsContent.clientHeight === logsContent.scrollHeight;
+                    if (shouldScroll) {
+                        requestAnimationFrame(() => {
+                            logsContent.scrollTop = logsContent.scrollHeight;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('获取日志失败:', error);
+                    alert('获取日志失败，请重试');
+                });
+        }
+        function clearLogs() {
+            const logsContent = document.getElementById('logs-content');
+            logsContent.innerHTML = '<span class="log-info">日志已清空</span>';
+        }
+        let logRefreshInterval;
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.getAttribute('data-page') === 'logs') {
+                    refreshLogs();
+                    logRefreshInterval = setInterval(refreshLogs, 5000);
+                } else {
+                    clearInterval(logRefreshInterval);
+                }
+            });
+        });
+
+        (function() {
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                    e.preventDefault();
+                    detectDevTools();
+                }
+            });
+            let devToolsCheck = setInterval(detectDevTools, 1000);            
+            const consoleLog = console.log;
+            Object.defineProperty(console, 'log', {
+                get: function() {
+                    detectDevTools();
+                    return consoleLog;
+                }
+            });
+        })();
+    </script>
+</body>
+</html> 
